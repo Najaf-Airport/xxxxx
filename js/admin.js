@@ -1,3 +1,4 @@
+// admin.js
 import { saveAs } from "https://cdn.jsdelivr.net/npm/file-saver@2.0.5/+esm";
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell } from "https://cdn.jsdelivr.net/npm/docx@7.7.0/+esm";
 
@@ -10,7 +11,7 @@ async function fetchAllFlights() {
     headers: { Authorization: `Bearer ${airtableApiKey}` }
   });
   const data = await res.json();
-  return data.records;
+  return data.records || [];
 }
 
 function generateAdminCard(flight) {
@@ -65,8 +66,13 @@ window.exportFlight = exportFlight;
 window.onload = async () => {
   const container = document.getElementById("adminFlightsContainer");
   const logoutBtn = document.getElementById("logoutBtn");
+
   const flights = await fetchAllFlights();
-  flights.forEach(flight => container.appendChild(generateAdminCard(flight)));
+  if (flights.length === 0) {
+    container.innerHTML = "<p>لا توجد بيانات رحلات.</p>";
+  } else {
+    flights.forEach(flight => container.appendChild(generateAdminCard(flight)));
+  }
 
   logoutBtn.onclick = () => {
     localStorage.clear();
