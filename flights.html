@@ -2,22 +2,22 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>صفحة الرحلات</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>رحلات المستخدم</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>جدول الرحلات</h1>
-  <button id="exportBtn">تصدير إلى Word</button>
-  <table border="1" id="flightsTable">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>FLT.NO</th>
-        <th>Time on Chocks</th>
-        <!-- … بقية العناوين حسب الحقول … -->
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="container user-page">
+    <h1>رحلات اليوم</h1>
+    <div class="flight-cards">
+      <div class="card"><h2>رحلة 1</h2><form><!-- حقول الرحلة 1 --></form></div>
+      <div class="card"><h2>رحلة 2</h2><form><!-- حقول الرحلة 2 --></form></div>
+      <div class="card"><h2>رحلة 3</h2><form><!-- حقول الرحلة 3 --></form></div>
+      <div class="card"><h2>رحلة 4</h2><form><!-- حقول الرحلة 4 --></form></div>
+    </div>
+    <button id="saveBtn">حفظ الرحلات</button>
+    <button id="exportBtn">تصدير إلى Word</button>
+  </div>
   <script src="flights.js"></script>
 </body>
 </html>
