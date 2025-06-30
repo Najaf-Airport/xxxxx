@@ -2,31 +2,76 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة تحكم المسؤول</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background-color: rgba(255,255,255,0.95);
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .flight-card {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: #f9f9f9;
+    }
+    .flight-card p {
+      margin: 5px 0;
+    }
+    .export-btn, .logout-btn {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .export-btn {
+      background-color: #3498db;
+      color: white;
+    }
+    .logout-btn {
+      background-color: #e74c3c;
+      color: white;
+      display: block;
+      margin: 20px auto 0;
+    }
+    .user-group {
+      margin-bottom: 30px;
+    }
+    .user-header {
+      font-weight: bold;
+      font-size: 1.2em;
+      background: #2980b9;
+      color: white;
+      padding: 8px;
+      border-radius: 5px;
+    }
+  </style>
 </head>
 <body>
-  <h1 class="centered">لوحة تحكم المسؤول</h1>
-
-  <div class="filter-section">
-    <label for="userFilter">فلترة حسب المستخدم:</label>
-    <select id="userFilter">
-      <option value="">الكل</option>
-    </select>
-
-    <label for="dateFilter">فلترة حسب التاريخ:</label>
-    <input type="date" id="dateFilter">
+  <div class="container">
+    <h2>لوحة تحكم المسؤول</h2>
+    <div id="flightContainer"></div>
+    <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
   </div>
 
-  <div id="flightsContainer"></div>
-
-  <div class="export-section">
-    <button id="exportAllBtn">تصدير كل الرحلات إلى Word</button>
-    <button id="exportStatsBtn">تصدير الإحصائيات</button>
-    <button id="logoutBtn">تسجيل الخروج</button>
-  </div>
-
-  <script src="admin.js"></script>
+  <script src="js/admin.js"></script>
 </body>
 </html>
