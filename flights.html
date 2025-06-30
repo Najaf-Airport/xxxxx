@@ -6,18 +6,42 @@
   <title>رحلات المستخدم</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body style="background-image: url('background.jpg'); background-size: cover;">
   <div class="container user-page">
     <h1>رحلات اليوم</h1>
+    <div id="saved-flights" class="saved-flights"></div>
     <div class="flight-cards">
-      <div class="card"><h2>رحلة 1</h2><form><!-- حقول الرحلة 1 --></form></div>
-      <div class="card"><h2>رحلة 2</h2><form><!-- حقول الرحلة 2 --></form></div>
-      <div class="card"><h2>رحلة 3</h2><form><!-- حقول الرحلة 3 --></form></div>
-      <div class="card"><h2>رحلة 4</h2><form><!-- حقول الرحلة 4 --></form></div>
+      <!-- بطاقات الرحلات -->
+      <div class="card">
+        <h2>رحلة 1</h2>
+        <form class="flight-form">
+          <label>رقم الرحلة: <input type="text" name="flightNumber"></label>
+          <label>التاريخ: <input type="date" name="date"></label>
+          <label>ON Chocks Time: <input type="time" name="onChocks"></label>
+          <label>Open Door Time: <input type="time" name="openDoor"></label>
+          <label>Start Cleaning Time: <input type="time" name="startCleaning"></label>
+          <label>Complete Cleaning Time: <input type="time" name="completeCleaning"></label>
+          <label>Ready Boarding Time: <input type="time" name="readyBoarding"></label>
+          <label>Start Boarding Time: <input type="time" name="startBoarding"></label>
+          <label>Complete Boarding Time: <input type="time" name="completeBoarding"></label>
+          <label>Close Door Time: <input type="time" name="closeDoor"></label>
+          <label>Off Chocks Time: <input type="time" name="offChocks"></label>
+          <label>ملاحظات: <textarea name="notes"></textarea></label>
+          <button type="button" class="export-btn">تصدير الرحلة إلى Word</button>
+        </form>
+      </div>
+      <!-- تكرر نفس البنية لرحلات 2-4 -->
+      <div class="card"><h2>رحلة 2</h2><form class="flight-form">...</form></div>
+      <div class="card"><h2>رحلة 3</h2><form class="flight-form">...</form></div>
+      <div class="card"><h2>رحلة 4</h2><form class="flight-form">...</form></div>
     </div>
-    <button id="saveBtn">حفظ الرحلات</button>
-    <button id="exportBtn">تصدير إلى Word</button>
+
+    <button id="saveBtn">💾 حفظ الرحلات</button>
+    <button id="exportAllBtn">📤 تصدير كل الرحلات إلى Word</button>
+    <button id="logoutBtn">🚪 تسجيل الخروج</button>
   </div>
-  <script src="flights.js"></script>
+
+  <script src="js/flights.js"></script>
+  <script src="js/word-export.js"></script>
 </body>
 </html>
