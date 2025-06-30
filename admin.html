@@ -1,28 +1,32 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>لوحة تحكم المسؤول</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/style.css">
+  <title>لوحة تحكم المسؤول</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="header">
-    <h2>إحصائيات الرحلات</h2>
-    <button onclick="logout()">تسجيل الخروج</button>
-  </div>
+  <h1 class="centered">لوحة تحكم المسؤول</h1>
 
-  <div class="admin-controls">
-    <label>تصفية حسب الموظف:</label>
-    <select id="filter-user" onchange="loadAllFlights()">
+  <div class="filter-section">
+    <label for="userFilter">فلترة حسب المستخدم:</label>
+    <select id="userFilter">
       <option value="">الكل</option>
     </select>
+
+    <label for="dateFilter">فلترة حسب التاريخ:</label>
+    <input type="date" id="dateFilter">
   </div>
 
-  <div id="admin-flights-list">
-    <p>جاري تحميل بيانات الرحلات...</p>
+  <div id="flightsContainer"></div>
+
+  <div class="export-section">
+    <button id="exportAllBtn">تصدير كل الرحلات إلى Word</button>
+    <button id="exportStatsBtn">تصدير الإحصائيات</button>
+    <button id="logoutBtn">تسجيل الخروج</button>
   </div>
 
-  <script src="js/admin.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>
