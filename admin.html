@@ -1,77 +1,24 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>لوحة تحكم المسؤول</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: url('bg.jpg') no-repeat center center fixed;
-      background-size: cover;
-      margin: 0;
-      padding: 0;
-      direction: rtl;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background-color: rgba(255,255,255,0.95);
-      padding: 20px;
-      border-radius: 12px;
-      margin-top: 20px;
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .flight-card {
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 15px;
-      margin-bottom: 15px;
-      background-color: #f9f9f9;
-    }
-    .flight-card p {
-      margin: 5px 0;
-    }
-    .export-btn, .logout-btn {
-      padding: 8px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .export-btn {
-      background-color: #3498db;
-      color: white;
-    }
-    .logout-btn {
-      background-color: #e74c3c;
-      color: white;
-      display: block;
-      margin: 20px auto 0;
-    }
-    .user-group {
-      margin-bottom: 30px;
-    }
-    .user-header {
-      font-weight: bold;
-      font-size: 1.2em;
-      background: #2980b9;
-      color: white;
-      padding: 8px;
-      border-radius: 5px;
-    }
-  </style>
+  <title>لوحة تحكم المشرف</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <div class="container">
-    <h2>لوحة تحكم المسؤول</h2>
-    <div id="flightContainer"></div>
-    <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+<body style="background-image: url('background.jpg'); background-size: cover; background-position: center;">
+  <div class="header">
+    <h2>📊 لوحة تحكم المشرف</h2>
+    <button id="logoutBtn">🚪 تسجيل الخروج</button>
   </div>
 
-  <script src="js/admin.js"></script>
+  <div class="admin-controls">
+    <label for="userFilter">فلترة حسب اسم المستخدم:</label>
+    <select id="userFilter"><option value="">الكل</option></select>
+  </div>
+
+  <div id="adminFlightsContainer" class="flights-container"></div>
+
+  <script src="js/admin.js" type="module"></script>
 </body>
 </html>
