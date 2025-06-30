@@ -18,6 +18,72 @@
   <br>
   <button id="loginBtn">دخول</button>
 
-  <script src="login.js"></script>
+  <script>
+    const airtableApiKey = "patzHLAT75PrYMFmp.44ea1c1498ed33513020e65b1fdf5e9ec4839804737275780347d53b9c9dbf3f";
+    const baseId = "appNQL4G3kqHBCJIk";
+    const tableName = "المستخدمين";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const nameSelect = document.getElementById("userSelect");
+      const passwordInput = document.getElementById("passwordInput");
+      const loginBtn = document.getElementById("loginBtn");
+
+      async function loadUsers() {
+        try {
+          const res = await fetch(`https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}`, {
+            headers: {
+              Authorization: `Bearer ${airtableApiKey}`
+            }
+          });
+
+          const data = await res.json();
+          nameSelect.innerHTML = '<option value="">-- اختر --</option>';
+          data.records.forEach(record => {
+            if (record.fields["اسم المنسق"]) {
+              const option = document.createElement("option");
+              option.value = record.id;
+              option.textContent = record.fields["اسم المنسق"];
+              nameSelect.appendChild(option);
+            }
+          });
+        } catch (err) {
+          alert("فشل تحميل الأسماء");
+        }
+      }
+
+      loginBtn.addEventListener("click", async () => {
+        const selectedId = nameSelect.value;
+        const password = passwordInput.value.trim();
+        if (!selectedId || !password) return alert("يرجى إدخال جميع الحقول");
+
+        try {
+          const res = await fetch(`https://api.airtable.com/v0/${baseId}/${tableName}/${selectedId}`, {
+            headers: {
+              Authorization: `Bearer ${airtableApiKey}`
+            }
+          });
+          const record = await res.json();
+          const realPassword = record.fields["الرمز السري"];
+          const role = record.fields["الدور"];
+          const name = record.fields["اسم المنسق"];
+
+          if (password !== realPassword) return alert("الرمز السري غير صحيح");
+
+          localStorage.setItem("username", name);
+          localStorage.setItem("role", role);
+
+          if (role === "admin" || role === "مسؤول") {
+            window.location.href = "admin.html";
+          } else {
+            window.location.href = "flights.html";
+          }
+        } catch (err) {
+          alert("فشل تسجيل الدخول");
+        }
+      });
+
+      await loadUsers();
+    });
+  </script>
 </body>
 </html>
