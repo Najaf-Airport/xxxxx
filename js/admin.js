@@ -1,89 +1,115 @@
-const API_KEY = "patQBXliPXWDCS60Q.40545a7b3ff6b6ebe3e001088c5ea9ba12e975e3eebfde59b8c132e5c675f0c8";
-const BASE_ID = "appNQL4G3kqHBCJIk";
-const FLIGHTS_TABLE = "جدول الرحلات";
-const FLIGHTS_VIEW = "viwUdTgSNKTh1mMeq";
+// admin.js
 
-const username = localStorage.getItem("username");
-const role = localStorage.getItem("role");
-if (!username || role !== "admin") {
-  window.location.href = "index.html";
-}
+const airtableApiKey = "patzHLAT75PrYMFmp.44ea1c1498ed33513020e65b1fdf5e9ec4839804737275780347d53b9c9dbf3f";
+const baseId = "appNQL4G3kqHBCJIk";
+const flightsTable = "جدول الرحلات";
+const usersTable = "المستخدمين";
 
-const filterSelect = document.getElementById("filter-user");
-const listDiv = document.getElementById("admin-flights-list");
+const flightContainer = document.getElementById("flightsContainer");
+const logoutBtn = document.getElementById("logoutBtn");
 
-function logout() {
-  localStorage.clear();
-  window.location.href = "index.html";
-}
+const exportToWord = async (flight) => {
+  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } = docx;
 
-async function loadAllFlights() {
-  listDiv.innerHTML = "";
+  const doc = new Document({
+    sections: [
+      {
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Najaf International Airport",
+                bold: true,
+                size: 28,
+              }),
+            ],
+            alignment: "center",
+          }),
+          new Paragraph({ text: "Airside Operations Dept", alignment: "right" }),
+          new Paragraph({ text: "Aircraft Coordination Unit", alignment: "right" }),
+          new Paragraph({ text: " " }),
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: Object.entries(flight).map(([key, value]) =>
+              new TableRow({
+                children: [
+                  new TableCell({
+                    children: [new Paragraph({ text: key })],
+                  }),
+                  new TableCell({
+                    children: [new Paragraph({ text: value || "" })],
+                  }),
+                ],
+              })
+            ),
+          }),
+          new Paragraph({ text: " " }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "اسم المنسق: " + (flight["اسم المنسق"] || ""), bold: true }),
+            ],
+          }),
+          new Paragraph({ text: "ملاحظات: " + (flight["NOTES"] || "") }),
+        ],
+      },
+    ],
+  });
+
+  const blob = await Packer.toBlob(doc);
+  const fileName = `رحلة_${flight["FLT.NO"] || ""}_${flight["Date"] || ""}.docx`;
+  saveAs(blob, fileName);
+};
+
+async function fetchFlights() {
   try {
-    const res = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(FLIGHTS_TABLE)}?view=${FLIGHTS_VIEW}`, {
-      headers: { Authorization: `Bearer ${API_KEY}` }
+    const res = await fetch(`https://api.airtable.com/v0/${baseId}/${flightsTable}?pageSize=100`, {
+      headers: { Authorization: `Bearer ${airtableApiKey}` },
     });
     const data = await res.json();
-    
-    // بناء قائمة المستخدمين وعدد رحلاتهم
-    const counts = {};
-    data.records.forEach(r => {
-      const n = r.fields["اسم المنسق"];
-      counts[n] = (counts[n] || 0) + 1;
+    const records = data.records;
+
+    const grouped = {};
+    records.forEach((rec) => {
+      const name = rec.fields["اسم المنسق"] || "غير معروف";
+      if (!grouped[name]) grouped[name] = [];
+      grouped[name].push(rec.fields);
     });
-    
-    // تعبئة Dropdown
-    filterSelect.innerHTML = `<option value="">الكل</option>`;
-    Object.keys(counts).forEach(n => {
-      const o = document.createElement("option");
-      o.value = n;
-      o.textContent = `${n} (${counts[n]})`;
-      filterSelect.appendChild(o);
+
+    flightContainer.innerHTML = "";
+    for (const name in grouped) {
+      const groupDiv = document.createElement("div");
+      groupDiv.innerHTML = `<h3>${name} (${grouped[name].length})</h3>`;
+
+      grouped[name].forEach((flight, index) => {
+        const card = document.createElement("div");
+        card.className = "flight-card";
+        card.innerHTML = `
+          <p><strong>FLT.NO:</strong> ${flight["FLT.NO"] || ""}</p>
+          <p><strong>Date:</strong> ${flight["Date"] || ""}</p>
+          <p><strong>NOTES:</strong> ${flight["NOTES"] || ""}</p>
+          <button class="export-btn" data-index="${index}" data-name="${name}">تصدير إلى Word</button>
+        `;
+        groupDiv.appendChild(card);
+      });
+
+      flightContainer.appendChild(groupDiv);
+    }
+
+    document.querySelectorAll(".export-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const name = e.target.getAttribute("data-name");
+        const index = e.target.getAttribute("data-index");
+        exportToWord(grouped[name][index]);
+      });
     });
-    
-    // ترشيح السجلات
-    const sel = filterSelect.value;
-    const recs = data.records.filter(r => !sel || r.fields["اسم المنسق"] === sel);
-    
-    // عرض
-    recs.forEach(r => {
-      const f = r.fields;
-      const el = document.createElement("div");
-      el.className = "admin-flight-card";
-      el.innerHTML = `
-        <h4>${f["اسم المنسق"]} - رحلة ${f["FLT.NO"]||"-"}</h4>
-        <p><strong>التاريخ:</strong> ${f["Date"]||"-"}</p>
-        <p><strong>ملاحظات:</strong> ${f["NOTES"]||"-"}</p>
-      `;
-      listDiv.appendChild(el);
-    });
-    
-    // زر تصدير عام
-    const exportAll = document.createElement("button");
-    exportAll.textContent = "تصدير الكل إلى Word";
-    exportAll.onclick = () => exportAdmin(data.records);
-    listDiv.prepend(exportAll);
-    
-  } catch (e) {
-    listDiv.innerHTML = "<p>فشل تحميل البيانات.</p>";
-    console.error(e);
+  } catch (err) {
+    alert("فشل تحميل الرحلات");
   }
 }
 
-// دالة تصدير المسؤول
-function exportAdmin(records) {
-  const lines = [`تقارير شعبة تنسيق الطائرات`, ``];
-  records.forEach(r => {
-    const f = r.fields;
-    lines.push(`المنسق: ${f["اسم المنسق"]||"-"}`, `رقم الرحلة: ${f["FLT.NO"]||"-"}`, `التاريخ: ${f["Date"]||"-"}`, `ملاحظات: ${f["NOTES"]||"-"}`, ``);
-  });
-  const blob = new Blob([lines.join("\n")], { type: "application/msword" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `all-flights.doc`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
+logoutBtn.addEventListener("click", () => {
+  localStorage.clear();
+  window.location.href = "index.html";
+});
 
-window.onload = loadAllFlights;
+document.addEventListener("DOMContentLoaded", fetchFlights);
