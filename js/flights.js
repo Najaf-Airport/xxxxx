@@ -1,11 +1,12 @@
-// flights.js
+// flights.js (مُحدث)
 import { saveAs } from "https://cdn.jsdelivr.net/npm/file-saver@2.0.5/+esm";
-import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell } from "https://cdn.jsdelivr.net/npm/docx@7.7.0/+esm";
+import {
+  Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell
+} from "https://cdn.jsdelivr.net/npm/docx@7.7.0/+esm";
 
 const airtableApiKey = "patzHLAT75PrYMFmp.44ea1c1498ed33513020e65b1fdf5e9ec4839804737275780347d53b9c9dbf3f";
 const baseId = "appNQL4G3kqHBCJIk";
 const tableName = "جدول الرحلات";
-
 const username = localStorage.getItem("username");
 
 async function fetchUserFlights() {
@@ -18,13 +19,23 @@ async function fetchUserFlights() {
 }
 
 function generateCard(flight) {
-  const fields = flight.fields;
+  const f = flight.fields;
   const div = document.createElement("div");
   div.className = "flight-card";
   div.innerHTML = `
-    <p><strong>FLT.NO:</strong> ${fields["FLT.NO"] || "-"}</p>
-    <p><strong>Date:</strong> ${fields["Date"] || "-"}</p>
-    <p><strong>ملاحظات:</strong> ${fields["NOTES"] || "-"}</p>
+    <p><strong>FLT.NO:</strong> ${f["FLT.NO"] || "-"}</p>
+    <p><strong>تاريخ:</strong> ${f["Date"] || "-"}</p>
+    <p><strong>Time on Chocks:</strong> ${f["Time on Chocks"] || "-"}</p>
+    <p><strong>Time open Door:</strong> ${f["Time open Door"] || "-"}</p>
+    <p><strong>Time Start Cleaning:</strong> ${f["Time Start Cleaning"] || "-"}</p>
+    <p><strong>Time complete cleaning:</strong> ${f["Time complete cleaning"] || "-"}</p>
+    <p><strong>Time ready boarding:</strong> ${f["Time ready boarding"] || "-"}</p>
+    <p><strong>Time start boarding:</strong> ${f["Time start boarding"] || "-"}</p>
+    <p><strong>Boarding Complete:</strong> ${f["Boarding Complete"] || "-"}</p>
+    <p><strong>Time Close Door:</strong> ${f["Time Close Door"] || "-"}</p>
+    <p><strong>Time off Chocks:</strong> ${f["Time off Chocks"] || "-"}</p>
+    <p><strong>ملاحظات:</strong> ${f["NOTES"] || "-"}</p>
+    <p><strong>اسم المنسق:</strong> ${f["اسم المنسق"] || "-"}</p>
     <button onclick="exportFlight('${flight.id}')">📄 تصدير</button>
   `;
   return div;
@@ -36,6 +47,12 @@ async function exportFlight(recordId) {
   });
   const { fields } = await res.json();
 
+  const fieldNames = [
+    "Date", "FLT.NO", "Time on Chocks", "Time open Door", "Time Start Cleaning",
+    "Time complete cleaning", "Time ready boarding", "Time start boarding",
+    "Boarding Complete", "Time Close Door", "Time off Chocks", "NOTES", "اسم المنسق"
+  ];
+
   const doc = new Document({
     sections: [
       {
@@ -45,14 +62,12 @@ async function exportFlight(recordId) {
             alignment: "CENTER"
           }),
           new Table({
-            rows: Object.entries(fields).map(([key, value]) =>
-              new TableRow({
-                children: [
-                  new TableCell({ children: [new Paragraph(key)] }),
-                  new TableCell({ children: [new Paragraph(value.toString())] })
-                ]
-              })
-            )
+            rows: fieldNames.map(field => new TableRow({
+              children: [
+                new TableCell({ children: [new Paragraph({ text: field })] }),
+                new TableCell({ children: [new Paragraph({ text: fields[field] || "-" })] })
+              ]
+            }))
           })
         ]
       }
