@@ -3,11 +3,10 @@ const baseId = "appNQL4G3kqHBCJIk";
 const tableName = "المستخدمين";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const nameSelect = document.getElementById("username");
-  const passwordInput = document.getElementById("password");
+  const nameSelect = document.getElementById("userSelect");
+  const passwordInput = document.getElementById("passwordInput");
   const loginBtn = document.getElementById("loginBtn");
-  
-  // تحميل الأسماء من Airtable
+
   async function loadNames() {
     try {
       const res = await fetch(`https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}`, {
@@ -30,13 +29,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert("فشل تحميل الأسماء");
     }
   }
-  
-  // تسجيل الدخول
+
   loginBtn.addEventListener("click", async () => {
     const selectedName = nameSelect.value;
     const password = passwordInput.value.trim();
     if (!selectedName || !password) return alert("يرجى إدخال جميع الحقول");
-    
+
     try {
       const res = await fetch(`https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}?filterByFormula={اسم المنسق}="${selectedName}"`, {
         headers: {
@@ -46,16 +44,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       const data = await res.json();
       const record = data.records[0];
       if (!record) return alert("المستخدم غير موجود");
-      
+
       const userPassword = record.fields["الرمز السري"];
       const userRole = record.fields["الدور"];
       const userName = record.fields["اسم المنسق"];
-      
+
       if (password !== userPassword) return alert("الرمز السري غير صحيح");
-      
+
       localStorage.setItem("username", userName);
       localStorage.setItem("role", userRole);
-      
+
       if (userRole === "مسؤول") {
         window.location.href = "admin.html";
       } else {
@@ -65,6 +63,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert("فشل تسجيل الدخول");
     }
   });
-  
+
   loadNames();
 });
