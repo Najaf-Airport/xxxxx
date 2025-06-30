@@ -1,3 +1,4 @@
+// flights.js
 import { saveAs } from "https://cdn.jsdelivr.net/npm/file-saver@2.0.5/+esm";
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell } from "https://cdn.jsdelivr.net/npm/docx@7.7.0/+esm";
 
@@ -8,11 +9,12 @@ const tableName = "جدول الرحلات";
 const username = localStorage.getItem("username");
 
 async function fetchUserFlights() {
-  const res = await fetch(`https://api.airtable.com/v0/${baseId}/${tableName}?filterByFormula=%7Bاسم%20المنسق%7D='${username}'`, {
+  const url = `https://api.airtable.com/v0/${baseId}/${tableName}?filterByFormula=${encodeURIComponent(`{اسم المنسق} = '${username}'`)}`;
+  const res = await fetch(url, {
     headers: { Authorization: `Bearer ${airtableApiKey}` }
   });
   const data = await res.json();
-  return data.records;
+  return data.records || [];
 }
 
 function generateCard(flight) {
@@ -23,7 +25,7 @@ function generateCard(flight) {
     <p><strong>FLT.NO:</strong> ${fields["FLT.NO"] || "-"}</p>
     <p><strong>Date:</strong> ${fields["Date"] || "-"}</p>
     <p><strong>ملاحظات:</strong> ${fields["NOTES"] || "-"}</p>
-    <button onclick="exportFlight('${flight.id}')">📄 تصدير الرحلة</button>
+    <button onclick="exportFlight('${flight.id}')">📄 تصدير</button>
   `;
   return div;
 }
@@ -64,10 +66,15 @@ async function exportFlight(recordId) {
 window.exportFlight = exportFlight;
 
 window.onload = async () => {
-  const container = document.getElementById("flightsContainer");
+  const container = document.getElementById("saved-flights");
   const logoutBtn = document.getElementById("logoutBtn");
+
   const flights = await fetchUserFlights();
-  flights.forEach(flight => container.appendChild(generateCard(flight)));
+  if (flights.length === 0) {
+    container.innerHTML = "<p>لا توجد رحلات مسجلة.</p>";
+  } else {
+    flights.forEach(flight => container.appendChild(generateCard(flight)));
+  }
 
   logoutBtn.onclick = () => {
     localStorage.clear();
