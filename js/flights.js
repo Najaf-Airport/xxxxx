@@ -1,66 +1,70 @@
 // flights.js
-import.meta.env;
+import { saveAs } from "https://cdn.jsdelivr.net/npm/file-saver@2.0.5/+esm";
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell } from "https://cdn.jsdelivr.net/npm/docx@7.7.0/+esm";
 
-const API_KEY       = import.meta.env.VITE_AIRTABLE_API_KEY;
-const BASE_ID       = import.meta.env.VITE_AIRTABLE_BASE_ID;
-const FLIGHTS_TBL   = encodeURIComponent("جدول الرحلات");
-const LINKED_FIELD  = "اسم المنسق"; // حقل الربط في جدول الرحلات
+const airtableApiKey = "patzHLAT75PrYMFmp.44ea1c1498ed33513020e65b1fdf5e9ec4839804737275780347d53b9c9dbf3f";
+const baseId = "appNQL4G3kqHBCJIk";
+const tableName = "جدول الرحلات";
 
-const headers = {
-  "Authorization": `Bearer ${API_KEY}`,
-  "Content-Type": "application/json",
+const username = localStorage.getItem("username");
+
+async function fetchUserFlights() {
+  const res = await fetch(`https://api.airtable.com/v0/${baseId}/${tableName}?filterByFormula=%7Bاسم%20المنسق%7D='${username}'`, {
+    headers: { Authorization: `Bearer ${airtableApiKey}` }
+  });
+  const data = await res.json();
+  return data.records;
+}
+
+function generateCard(flight) {
+  const fields = flight.fields;
+  const div = document.createElement("div");
+  div.className = "flight-card";
+  div.innerHTML = `
+    <p><strong>FLT.NO:</strong> ${fields["FLT.NO"] || "-"}</p>
+    <p><strong>Date:</strong> ${fields["Date"] || "-"}</p>
+    <p><strong>ملاحظات:</strong> ${fields["NOTES"] || "-"}</p>
+    <button onclick="exportFlight('${flight.id}')">تصدير</button>
+  `;
+  return div;
+}
+
+async function exportFlight(recordId) {
+  const res = await fetch(`https://api.airtable.com/v0/${baseId}/${tableName}/${recordId}`, {
+    headers: { Authorization: `Bearer ${airtableApiKey}` }
+  });
+  const { fields } = await res.json();
+
+  const doc = new Document({
+    sections: [
+      {
+        children: [
+          new Paragraph({
+            children: [new TextRun({ text: "تقرير الرحلة", bold: true, size: 28 })]
+          }),
+          new Table({
+            rows: Object.entries(fields).map(([key, value]) =>
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph(key)] }),
+                  new TableCell({ children: [new Paragraph(value.toString())] })
+                ]
+              })
+            )
+          })
+        ]
+      }
+    ]
+  });
+
+  const blob = await Packer.toBlob(doc);
+  saveAs(blob, `رحلة-${fields["FLT.NO"] || "بدون رقم"}.docx`);
+}
+
+window.onload = async () => {
+  const container = document.getElementById("flightsContainer");
+  const flights = await fetchUserFlights();
+  flights.forEach(flight => container.appendChild(generateCard(flight)));
 };
 
-async function fetchFlights() {
-  const user = JSON.parse(localStorage.getItem("currentUser") || "{}");
-  if (!user || !user.name) {
-    alert("رجاءً سجّل الدخول أولاً");
-    return [];
-  }
-
-  // إذا دور المستخدم admin خلي الفلتر فاضي، وإلا فلتر على اسمه:
-  let filterFormula = "";
-  if (user.role !== "admin") {
-    // صيغة Airtable: {اسم المنسق} = 'الاسم'
-    filterFormula = `?filterByFormula=({${LINKED_FIELD}}='${user.name}')`;
-  }
-
-  const resp = await fetch(
-    `https://api.airtable.com/v0/${BASE_ID}/${FLIGHTS_TBL}${filterFormula}`,
-    { headers }
-  );
-  const { records } = await resp.json();
-  return records.map(r => ({
-    id:     r.id,
-    fields: r.fields
-  }));
-}
-
-function renderTable(rows) {
-  const tbody = document.querySelector("#flightsTable tbody");
-  tbody.innerHTML = "";
-  rows.forEach(r => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${r.fields.Date || ""}</td>
-      <td>${r.fields["FLT.NO"] || ""}</td>
-      <td>${r.fields["Time on Chocks"] || ""}</td>
-      <!-- زد هنا بقية الأعمدة حسب الجدول -->
-    `;
-    tbody.append(tr);
-  });
-}
-
-window.addEventListener("DOMContentLoaded", async () => {
-  const flights = await fetchFlights();
-  renderTable(flights);
-
-  document.getElementById("exportBtn").addEventListener("click", () => {
-    // مثال بسيط: تحويل الجدول إلى HTML وفتح نافذة طباعة
-    const newWin = window.open("", "", "width=800,height=600");
-    newWin.document.write("<h1>تقرير الرحلات</h1>");
-    newWin.document.write(document.getElementById("flightsTable").outerHTML);
-    newWin.document.close();
-    newWin.print();
-  });
-});
+window.exportFlight = exportFlight;
