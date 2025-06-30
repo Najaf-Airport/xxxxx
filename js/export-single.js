@@ -1,4 +1,3 @@
-// ملف: js/export-single.js
 import {
   Document,
   Packer,
@@ -15,7 +14,19 @@ export async function exportToWord(flight) {
   const doc = new Document({
     sections: [
       {
+        properties: {
+          page: {
+            margin: { top: 720, bottom: 720, left: 720, right: 720 },
+            size: { orientation: "landscape" }
+          }
+        },
         children: [
+          new Paragraph({
+            alignment: AlignmentType.LEFT,
+            children: [
+              new TextRun({ text: `📅 التاريخ: ${flight["Date"] || "غير محدد"}`, size: 24 })
+            ]
+          }),
           new Paragraph({
             alignment: AlignmentType.CENTER,
             children: [
@@ -25,7 +36,8 @@ export async function exportToWord(flight) {
           new Paragraph({
             alignment: AlignmentType.CENTER,
             children: [
-              new TextRun({ text: "Airside Operations Dept", italics: true, size: 26 })
+              new TextRun({ text: "Airside Operations Dept", italics: true, size: 26 }),
+              new TextRun({ text: "\nAircraft Coordination Unit", break: 1, size: 24 })
             ]
           }),
           new Paragraph({ text: " " }),
@@ -34,7 +46,13 @@ export async function exportToWord(flight) {
           new Paragraph({
             alignment: AlignmentType.LEFT,
             children: [
-              new TextRun({ text: `اسم المنسق: ${flight["اسم المنسق"] || "غير معروف"}`, bold: true })
+              new TextRun({ text: `اسم المنسق: ${flight["اسم المنسق"] || "غير معروف"}`, bold: true, size: 24 })
+            ]
+          }),
+          new Paragraph({
+            alignment: AlignmentType.LEFT,
+            children: [
+              new TextRun({ text: `ملاحظات: ${flight["NOTES"] || "-"}`, size: 22 })
             ]
           })
         ]
@@ -54,30 +72,29 @@ export async function exportToWord(flight) {
 
 function createFlightTable(data) {
   const fields = [
-    "Date",
     "FLT.NO",
-    "Time on Chocks",
-    "Time open Door",
-    "Time Start Cleaning",
-    "Time complete cleaning",
-    "Time ready boarding",
-    "Time start boarding",
-    "Boarding Complete",
-    "Time Close Door",
-    "Time off Chocks",
-    "NOTES"
+    "ON chocks Time",
+    "Open Door Time",
+    "Start Cleaning Time",
+    "Complete Cleaning Time",
+    "Ready Boarding Time",
+    "Start Boarding Time",
+    "Complete Boarding Time",
+    "Close Door Time",
+    "Off chocks Time",
+    "Date"
   ];
 
   const rows = [
     new TableRow({
       children: fields.map(field => new TableCell({
-        width: { size: 100, type: WidthType.PERCENTAGE },
+        width: { size: 100 / fields.length, type: WidthType.PERCENTAGE },
         children: [new Paragraph({ text: field, bold: true })]
       }))
     }),
     new TableRow({
       children: fields.map(field => new TableCell({
-        width: { size: 100, type: WidthType.PERCENTAGE },
+        width: { size: 100 / fields.length, type: WidthType.PERCENTAGE },
         children: [new Paragraph({ text: data[field] || "-" })]
       }))
     })
