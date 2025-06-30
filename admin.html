@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة تحكم المسؤول</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="header">
+    <h2>إحصائيات الرحلات</h2>
+    <button onclick="logout()">تسجيل الخروج</button>
+  </div>
+
+  <div class="admin-controls">
+    <label>تصفية حسب الموظف:</label>
+    <select id="filter-user" onchange="loadAllFlights()">
+      <option value="">الكل</option>
+    </select>
+  </div>
+
+  <div id="admin-flights-list">
+    <p>جاري تحميل بيانات الرحلات...</p>
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>
