@@ -1,115 +1,75 @@
-// admin.js
+import { saveAs } from "https://cdn.jsdelivr.net/npm/file-saver@2.0.5/+esm";
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell } from "https://cdn.jsdelivr.net/npm/docx@7.7.0/+esm";
 
 const airtableApiKey = "patzHLAT75PrYMFmp.44ea1c1498ed33513020e65b1fdf5e9ec4839804737275780347d53b9c9dbf3f";
 const baseId = "appNQL4G3kqHBCJIk";
-const flightsTable = "جدول الرحلات";
-const usersTable = "المستخدمين";
+const tableName = "جدول الرحلات";
 
-const flightContainer = document.getElementById("flightsContainer");
-const logoutBtn = document.getElementById("logoutBtn");
+async function fetchAllFlights() {
+  const res = await fetch(`https://api.airtable.com/v0/${baseId}/${tableName}`, {
+    headers: { Authorization: `Bearer ${airtableApiKey}` }
+  });
+  const data = await res.json();
+  return data.records;
+}
 
-const exportToWord = async (flight) => {
-  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } = docx;
+function generateAdminCard(flight) {
+  const fields = flight.fields;
+  const div = document.createElement("div");
+  div.className = "admin-flight-card";
+  div.innerHTML = `
+    <p><strong>اسم المنسق:</strong> ${fields["اسم المنسق"] || "-"}</p>
+    <p><strong>FLT.NO:</strong> ${fields["FLT.NO"] || "-"}</p>
+    <p><strong>Date:</strong> ${fields["Date"] || "-"}</p>
+    <p><strong>ملاحظات:</strong> ${fields["NOTES"] || "-"}</p>
+    <button onclick="exportFlight('${flight.id}')">📄 تصدير الرحلة</button>
+  `;
+  return div;
+}
+
+async function exportFlight(recordId) {
+  const res = await fetch(`https://api.airtable.com/v0/${baseId}/${tableName}/${recordId}`, {
+    headers: { Authorization: `Bearer ${airtableApiKey}` }
+  });
+  const { fields } = await res.json();
 
   const doc = new Document({
     sections: [
       {
         children: [
           new Paragraph({
-            children: [
-              new TextRun({
-                text: "Najaf International Airport",
-                bold: true,
-                size: 28,
-              }),
-            ],
-            alignment: "center",
+            children: [new TextRun({ text: "تقرير الرحلة", bold: true, size: 28 })],
+            alignment: "CENTER"
           }),
-          new Paragraph({ text: "Airside Operations Dept", alignment: "right" }),
-          new Paragraph({ text: "Aircraft Coordination Unit", alignment: "right" }),
-          new Paragraph({ text: " " }),
           new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: Object.entries(flight).map(([key, value]) =>
+            rows: Object.entries(fields).map(([key, value]) =>
               new TableRow({
                 children: [
-                  new TableCell({
-                    children: [new Paragraph({ text: key })],
-                  }),
-                  new TableCell({
-                    children: [new Paragraph({ text: value || "" })],
-                  }),
-                ],
+                  new TableCell({ children: [new Paragraph(key)] }),
+                  new TableCell({ children: [new Paragraph(value.toString())] })
+                ]
               })
-            ),
-          }),
-          new Paragraph({ text: " " }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "اسم المنسق: " + (flight["اسم المنسق"] || ""), bold: true }),
-            ],
-          }),
-          new Paragraph({ text: "ملاحظات: " + (flight["NOTES"] || "") }),
-        ],
-      },
-    ],
+            )
+          })
+        ]
+      }
+    ]
   });
 
   const blob = await Packer.toBlob(doc);
-  const fileName = `رحلة_${flight["FLT.NO"] || ""}_${flight["Date"] || ""}.docx`;
-  saveAs(blob, fileName);
-};
-
-async function fetchFlights() {
-  try {
-    const res = await fetch(`https://api.airtable.com/v0/${baseId}/${flightsTable}?pageSize=100`, {
-      headers: { Authorization: `Bearer ${airtableApiKey}` },
-    });
-    const data = await res.json();
-    const records = data.records;
-
-    const grouped = {};
-    records.forEach((rec) => {
-      const name = rec.fields["اسم المنسق"] || "غير معروف";
-      if (!grouped[name]) grouped[name] = [];
-      grouped[name].push(rec.fields);
-    });
-
-    flightContainer.innerHTML = "";
-    for (const name in grouped) {
-      const groupDiv = document.createElement("div");
-      groupDiv.innerHTML = `<h3>${name} (${grouped[name].length})</h3>`;
-
-      grouped[name].forEach((flight, index) => {
-        const card = document.createElement("div");
-        card.className = "flight-card";
-        card.innerHTML = `
-          <p><strong>FLT.NO:</strong> ${flight["FLT.NO"] || ""}</p>
-          <p><strong>Date:</strong> ${flight["Date"] || ""}</p>
-          <p><strong>NOTES:</strong> ${flight["NOTES"] || ""}</p>
-          <button class="export-btn" data-index="${index}" data-name="${name}">تصدير إلى Word</button>
-        `;
-        groupDiv.appendChild(card);
-      });
-
-      flightContainer.appendChild(groupDiv);
-    }
-
-    document.querySelectorAll(".export-btn").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        const name = e.target.getAttribute("data-name");
-        const index = e.target.getAttribute("data-index");
-        exportToWord(grouped[name][index]);
-      });
-    });
-  } catch (err) {
-    alert("فشل تحميل الرحلات");
-  }
+  saveAs(blob, `رحلة-${fields["FLT.NO"] || "بدون-رقم"}.docx`);
 }
 
-logoutBtn.addEventListener("click", () => {
-  localStorage.clear();
-  window.location.href = "index.html";
-});
+window.exportFlight = exportFlight;
 
-document.addEventListener("DOMContentLoaded", fetchFlights);
+window.onload = async () => {
+  const container = document.getElementById("adminFlightsContainer");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const flights = await fetchAllFlights();
+  flights.forEach(flight => container.appendChild(generateAdminCard(flight)));
+
+  logoutBtn.onclick = () => {
+    localStorage.clear();
+    window.location.href = "index.html";
+  };
+};
