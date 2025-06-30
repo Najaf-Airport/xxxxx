@@ -1,4 +1,3 @@
-// flights.js
 import { saveAs } from "https://cdn.jsdelivr.net/npm/file-saver@2.0.5/+esm";
 import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell } from "https://cdn.jsdelivr.net/npm/docx@7.7.0/+esm";
 
@@ -24,7 +23,7 @@ function generateCard(flight) {
     <p><strong>FLT.NO:</strong> ${fields["FLT.NO"] || "-"}</p>
     <p><strong>Date:</strong> ${fields["Date"] || "-"}</p>
     <p><strong>ملاحظات:</strong> ${fields["NOTES"] || "-"}</p>
-    <button onclick="exportFlight('${flight.id}')">تصدير</button>
+    <button onclick="exportFlight('${flight.id}')">📄 تصدير الرحلة</button>
   `;
   return div;
 }
@@ -40,7 +39,8 @@ async function exportFlight(recordId) {
       {
         children: [
           new Paragraph({
-            children: [new TextRun({ text: "تقرير الرحلة", bold: true, size: 28 })]
+            children: [new TextRun({ text: "تقرير الرحلة", bold: true, size: 28 })],
+            alignment: "CENTER"
           }),
           new Table({
             rows: Object.entries(fields).map(([key, value]) =>
@@ -58,13 +58,19 @@ async function exportFlight(recordId) {
   });
 
   const blob = await Packer.toBlob(doc);
-  saveAs(blob, `رحلة-${fields["FLT.NO"] || "بدون رقم"}.docx`);
+  saveAs(blob, `رحلة-${fields["FLT.NO"] || "بدون-رقم"}.docx`);
 }
+
+window.exportFlight = exportFlight;
 
 window.onload = async () => {
   const container = document.getElementById("flightsContainer");
+  const logoutBtn = document.getElementById("logoutBtn");
   const flights = await fetchUserFlights();
   flights.forEach(flight => container.appendChild(generateCard(flight)));
-};
 
-window.exportFlight = exportFlight;
+  logoutBtn.onclick = () => {
+    localStorage.clear();
+    window.location.href = "index.html";
+  };
+};
