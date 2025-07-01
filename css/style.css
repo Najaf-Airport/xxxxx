@@ -1,10 +1,10 @@
+<!-- style.css -->
 body {
   font-family: Arial, sans-serif;
   background-color: #f1f1f1;
   direction: rtl;
   text-align: center;
   padding: 40px;
-  margin: 0;
 }
 
 .login-box {
@@ -24,78 +24,30 @@ body {
   margin: 10px 0;
 }
 
-.error-message {
-  color: red;
-  font-size: 0.9em;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-}
-
-.flight-card, .admin-flight-card, .card {
+.flight-card, .admin-flight-card {
   background: white;
-  margin-bottom: 15px;
-  padding: 20px;
+  margin: 10px;
+  padding: 15px;
   border-radius: 10px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.1);
-  text-align: right;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
 }
 
-.flight-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.flight-form label {
-  display: block;
-  margin: 8px 0 4px;
-  text-align: right;
-}
-
-.flight-form input,
-.flight-form textarea {
-  width: 100%;
-  padding: 8px;
-  font-size: 14px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.flight-form button,
-#saveBtn, #exportAllBtn, #logoutBtn {
-  padding: 10px 15px;
-  margin: 10px 5px;
-  font-size: 14px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  background-color: #3498db;
-  color: white;
-}
-
-.flight-form button:hover,
-#saveBtn:hover, #exportAllBtn:hover, #logoutBtn:hover {
-  background-color: #2980b9;
-}
-
-.saved-flights {
-  margin-bottom: 20px;
-}
-
-.flights-container,
-.admin-controls {
+.flights-container {
   max-width: 800px;
   margin: 20px auto;
   text-align: right;
 }
 
-.admin-controls select {
-  margin-left: 10px;
+button {
+  padding: 10px 20px;
+  margin-top: 10px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #2980b9;
 }
