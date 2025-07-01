@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           nameSelect.appendChild(option);
         }
       });
-    } catch (err) {
+    } catch {
       alert("فشل تحميل الأسماء");
     }
   }
@@ -47,11 +47,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const userPassword = record.fields["الرمز السري"];
       const userRole = record.fields["الدور"];
-      const userName = record.fields["اسم المنسق"];
 
       if (password !== userPassword) return alert("الرمز السري غير صحيح");
 
-      localStorage.setItem("username", userName);
+      localStorage.setItem("username", selectedName);
       localStorage.setItem("role", userRole);
 
       if (userRole === "مسؤول") {
@@ -59,7 +58,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       } else {
         window.location.href = "flights.html";
       }
-    } catch (err) {
+    } catch {
       alert("فشل تسجيل الدخول");
     }
   });
